@@ -1,0 +1,102 @@
+import math
+from sympy import diff, symbols
+
+print('Метод градиентного спуска с постоянным шагом')
+print('\nУравнение - F(x) = x1^4 + x1^2*x2 - 6x1^2 - 1,2*x1x2 + x2^2')
+h = 0.1
+e = 0.1
+checker = 0
+start_point_symplex = [1, 2]
+print('Метод градиентного спуска с постоянным шагом с точностью e = ', e)
+print('Начальная базисная точка x0 = ', start_point_symplex)
+
+def func_gradient():                                                    # функция градиента f(x)
+    x1, x2 = symbols('x1, x2')
+    num1 = 'x1'
+    num2 = 'x2'
+    res = diff(x1**4)
+    res2 = diff(x1**2)
+    res4 = 6 * res2
+    res6 = diff(x2**2)
+    return ('({} + {}*{} - {} - 1.2*{}); (x1**2 - 1.2*{} + {})'.format(res, res2, num2, res4, num2, num1, res6))
+
+
+print('\nИтерация 0')
+
+grad = func_gradient()
+print('\nГрадиент функции')
+print(grad)
+
+coordiantion_list_x0 = []
+coordiantion_list_x1 = []
+value_list_func = []
+gradient_list = []
+norm_list = []
+
+coordiantion_list_x0.append(start_point_symplex[0])
+coordiantion_list_x1.append(start_point_symplex[1])
+
+def Func_value(x1, x2, _list_value_x):                                                                 # функция вычисления значения целевой функции
+    result = round((x1**4 + (x1**2)*x2 - 6*(x1**2) - 1.2*x1*x2 +x2**2), 3)
+    _list_value_x.append(result)
+    return _list_value_x
+
+value_list_func = Func_value(coordiantion_list_x0[0], coordiantion_list_x1[0], value_list_func)              
+print('\nЗначение функции = ', value_list_func)
+
+def Gradient_value(x1, x2):                                             # функция вычисления значений градиента по коорданитам х1, х2
+    result1 = round((4 * (x1**3) + 2*x1*x2 - 12*x1 - 1.2*x2), 3)
+    result2 = round((x1**2 - 1.2*x1 + 2*x2), 3)
+    _list = [result1, result2]
+    return _list
+
+gradient_list = Gradient_value(coordiantion_list_x0[0], coordiantion_list_x1[0])            
+print('\nЗначение градиента в точке = ', gradient_list)
+
+def Func_coordination(x1, x2, _list, _list2, _list3):                                   # функция определения координат f(x)
+    result1 = [h * x for x in _list]
+    result2 = [x1, x2]
+    result3 = list(map(lambda x, y: x - y, result2, result1))
+    _list2.append(result3[0])
+    _list3.append(result3[1])
+    return _list2, _list3
+
+coordiantion_list_x0, coordiantion_list_x1 = Func_coordination(coordiantion_list_x0[-1], coordiantion_list_x1[-1], gradient_list, coordiantion_list_x0, coordiantion_list_x1)         # координаты точки х1
+print('\nКоординаты x1, x2 = ', coordiantion_list_x0, coordiantion_list_x1)
+
+value_list_func = Func_value(coordiantion_list_x0[-1], coordiantion_list_x1[-1], value_list_func)
+print('\nНовое значение функции = ', value_list_func)
+
+gradient_list = Gradient_value(coordiantion_list_x0[-1], coordiantion_list_x1[-1])
+print('\nВектор градиента в точке F(x1) = ', gradient_list)
+
+def func_norm_vector(x1, x2, _norm_list):
+    result = round((x1**2 + x2**2), 3)
+    end = math.sqrt(result)
+    end2 = round((end), 3)
+    _norm_list.append(end2)
+    return _norm_list
+
+norm_list = func_norm_vector(gradient_list[0], gradient_list[1], norm_list)
+print('\nНорма вектора градиента х1 = ', norm_list)
+
+
+
+while norm_list[-1] > e:
+    
+    coordiantion_list_x0, coordiantion_list_x1 = Func_coordination(coordiantion_list_x0[-1], coordiantion_list_x1[-1], gradient_list, coordiantion_list_x0, coordiantion_list_x1) 
+    
+    value_list_func = Func_value(coordiantion_list_x0[-1], coordiantion_list_x1[-1], value_list_func)
+    
+    gradient_list = Gradient_value(coordiantion_list_x0[-1], coordiantion_list_x1[-1])
+    
+    norm_list = func_norm_vector(gradient_list[0], gradient_list[1], norm_list)
+
+    checker += 1
+
+    if value_list_func[-1] > value_list_func[-2]:
+        h /= 2
+        
+print('\nКоличество итераций = ', checker)
+print('Координаты функции при последней итерации = ', coordiantion_list_x0[-1], coordiantion_list_x1[-1])
+print('Значение нормы вектора при последней итерации = ', norm_list[-1])
